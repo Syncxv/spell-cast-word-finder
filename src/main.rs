@@ -2,7 +2,7 @@
 extern crate warp;
 use core::fmt;
 use serde::{Deserialize, Serialize};
-use std::{env, fs, rc::Rc, time::Instant};
+use std::{fs, rc::Rc};
 use trie_rs::{Trie, TrieBuilder};
 use warp::Filter;
 
@@ -65,7 +65,7 @@ async fn main() {
             warp::reply::json(&result)
         });
 
-    warp::serve(words).run(([127, 0, 0, 1], 3030)).await;
+    warp::serve(words).run(([0, 0, 0, 0], 3030)).await;
 }
 
 fn get_combos<'a>(
