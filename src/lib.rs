@@ -1,8 +1,10 @@
 use core::fmt;
-use std::{fs, rc::Rc};
+use std::{cell::RefCell, fs, rc::Rc};
 
+use js_sys::Array;
 use serde::Serialize;
-use trie_rs::Trie;
+use trie_rs::{Trie, TrieBuilder};
+use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
 const SIZE: usize = 5;
 const DIRECTIONS: [(i32, i32); 8] = [
@@ -162,4 +164,36 @@ pub fn read_lines(filename: &str) -> Vec<String> {
     }
 
     result
+}
+
+#[wasm_bindgen]
+pub struct Wrapper {
+    grid: RefCell<Vec<Vec<Rc<Letter>>>>,
+    word_list: RefCell<Trie<u8>>,
+}
+
+#[wasm_bindgen]
+impl Wrapper {
+    #[wasm_bindgen(constructor)]
+    pub fn new(words: Array, combo: String) -> Self {
+        let mut builder = TrieBuilder::new();
+        for word in words.iter() {
+            let word_string = word.as_string().unwrap();
+            builder.push(&word_string);
+        }
+        let word_list = builder.build();
+
+        let grid = generate_grid(&combo);
+        Self {
+            grid: RefCell::new(grid),
+            word_list: RefCell::new(word_list),
+        }
+    }
+
+    pub fn get_combos(&self, n: usize) -> JsValue {
+        let grid_borrow = self.grid.borrow();
+        let word_list_borrow = self.word_list.borrow();
+        let combos = get_combos(&grid_borrow, &word_list_borrow, n);
+        JsValue::from_serde(&combos).unwrap()
+    }
 }
