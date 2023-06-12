@@ -190,10 +190,20 @@ impl Wrapper {
         }
     }
 
-    pub fn get_combos(&self, n: usize) -> JsValue {
+    pub fn get_combos(&self, n: usize) -> Array {
         let grid_borrow = self.grid.borrow();
         let word_list_borrow = self.word_list.borrow();
         let combos = get_combos(&grid_borrow, &word_list_borrow, n);
-        JsValue::from_serde(&combos).unwrap()
+        let js_combos = Array::new();
+        for combo in combos {
+            let js_combo = Array::new();
+            for letter in combo {
+                let js_letter = JsValue::from_serde(&letter).unwrap();
+                js_combo.push(&js_letter);
+            }
+            js_combos.push(&js_combo);
+        }
+
+        js_combos
     }
 }
