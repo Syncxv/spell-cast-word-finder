@@ -168,8 +168,8 @@ pub fn read_lines(filename: &str) -> Vec<String> {
 
 #[wasm_bindgen]
 pub struct Wrapper {
-    grid: RefCell<Vec<Vec<Rc<Letter>>>>,
-    word_list: RefCell<Trie<u8>>,
+    grid: Vec<Vec<Rc<Letter>>>,
+    word_list: Trie<u8>,
 }
 
 #[wasm_bindgen]
@@ -184,26 +184,11 @@ impl Wrapper {
         let word_list = builder.build();
 
         let grid = generate_grid(&combo);
-        Self {
-            grid: RefCell::new(grid),
-            word_list: RefCell::new(word_list),
-        }
+        Self { grid, word_list }
     }
 
-    pub fn get_combos(&self, n: usize) -> Array {
-        let grid_borrow = self.grid.borrow();
-        let word_list_borrow = self.word_list.borrow();
-        let combos = get_combos(&grid_borrow, &word_list_borrow, n);
-        let js_combos = Array::new();
-        for combo in combos {
-            let js_combo = Array::new();
-            for letter in combo {
-                let js_letter = JsValue::from_serde(&letter).unwrap();
-                js_combo.push(&js_letter);
-            }
-            js_combos.push(&js_combo);
-        }
-
-        js_combos
+    pub fn get_combos(&self, n: usize) -> JsValue {
+        let combos = get_combos(&self.grid, &self.word_list, n);
+        JsValue::from_serde(&combos).unwrap()
     }
 }
