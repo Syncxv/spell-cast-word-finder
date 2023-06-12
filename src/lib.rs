@@ -37,7 +37,7 @@ impl fmt::Display for Letter {
 }
 
 pub fn get_combos<'a>(
-    grid: &'a Vec<Vec<Rc<Letter>>>,
+    grid: &'a Vec<Vec<Letter>>,
     word_list: &'a Trie<u8>,
     n: usize,
 ) -> Vec<Vec<&'a Letter>> {
@@ -66,7 +66,7 @@ pub fn get_combos<'a>(
 }
 
 fn get_all_combinations<'a>(
-    grid: &'a Vec<Vec<Rc<Letter>>>,
+    grid: &'a Vec<Vec<Letter>>,
     trie: &Trie<u8>,
     row: usize,
     col: usize,
@@ -81,7 +81,7 @@ fn get_all_combinations<'a>(
 
     visited[row][col] = true;
 
-    combination.push(grid[row][col].as_ref());
+    combination.push(&grid[row][col]);
 
     let word: String = combination.iter().map(|&letter| letter.letter).collect();
     match word.len().cmp(&desired) {
@@ -127,14 +127,14 @@ fn get_all_combinations<'a>(
     combination.pop();
 }
 
-pub fn generate_grid(combo: &String) -> Vec<Vec<Rc<Letter>>> {
+pub fn generate_grid(combo: &String) -> Vec<Vec<Letter>> {
     if combo.len() != 25 {
         panic!("bruh invalid combo")
     }
 
     let real_combo = combo.to_lowercase();
 
-    let mut temp_grid: Vec<Vec<Rc<Letter>>> = vec![];
+    let mut temp_grid: Vec<Vec<Letter>> = vec![];
 
     for row in 0..combo.len() / SIZE {
         let mut temp_row = vec![];
@@ -145,10 +145,8 @@ pub fn generate_grid(combo: &String) -> Vec<Vec<Rc<Letter>>> {
                 None => panic!("Index out of bounds!"),
             };
             // println!("letter = {}", letter);
-            let letter_struct = Letter { letter, row, col };
-            let rc_letter = Rc::new(letter_struct);
 
-            temp_row.push(rc_letter.clone());
+            temp_row.push(Letter { letter, row, col });
         }
         temp_grid.push(temp_row);
     }
@@ -168,7 +166,7 @@ pub fn read_lines(filename: &str) -> Vec<String> {
 
 #[wasm_bindgen]
 pub struct Wrapper {
-    grid: Vec<Vec<Rc<Letter>>>,
+    grid: Vec<Vec<Letter>>,
     word_list: Trie<u8>,
 }
 
