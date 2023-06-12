@@ -63,7 +63,7 @@ pub fn get_combos<'a>(
     all_combos
 }
 
-pub fn get_all_combinations<'a>(
+fn get_all_combinations<'a>(
     grid: &'a Vec<Vec<Rc<Letter>>>,
     trie: &Trie<u8>,
     row: usize,
